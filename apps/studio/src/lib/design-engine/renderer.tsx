@@ -76,6 +76,14 @@ function themeToCSS(theme: ThemeConfig): React.CSSProperties {
 // ─── Shared Styles ─────────────────────────────────────────
 
 const sfStyles = `
+  ::-webkit-scrollbar {
+    display: none !important;
+  }
+  html, body {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+  }
+
   .sf-root {
     font-family: var(--sf-body-font);
     font-size: var(--sf-body-size);

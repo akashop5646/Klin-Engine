@@ -253,7 +253,16 @@ export class StoreDesignController {
 
       let website = await Website.findOne({ $or: [{ _id: websiteId }, { slug: websiteId }] });
       if (!website) {
-        return res.status(404).json({ error: "Website not found" });
+        const user = await User.findById(req.user.id);
+        const workspaceId = user ? user.activeWorkspaceId : null;
+        website = await Website.create({
+          _id: websiteId,
+          name: websiteId,
+          slug: websiteId,
+          workspaceId: workspaceId,
+          templateId: "streetwear-capsule",
+          status: "Draft",
+        });
       }
 
       if (theme) {

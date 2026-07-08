@@ -19,7 +19,8 @@ export default function WebsiteControlPanel() {
     const presetId = websiteId && websiteId.startsWith("clone-") 
       ? websiteId.replace("clone-", "") 
       : "classic-denim";
-    window.open(`http://localhost:8081/builder/${websiteId}?preset=${presetId}`, "_blank");
+    const token = localStorage.getItem("kiln.auth.token") || "";
+    window.open(`http://localhost:8081/builder/${websiteId}?preset=${presetId}&token=${token}`, "_blank");
   };
 
   const handlePublish = () => {

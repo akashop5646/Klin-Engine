@@ -195,7 +195,10 @@ export default function OnlineStorePage() {
                   Control Panel
                 </button>
                 <button
-                  onClick={() => window.open(`http://localhost:8081/builder/${site.id}?preset=${site.templateId}`, "_blank")}
+                  onClick={() => {
+                    const token = localStorage.getItem("kiln.auth.token") || "";
+                    window.open(`http://localhost:8081/builder/${site.id}?preset=${site.templateId}&token=${token}`, "_blank");
+                  }}
                   className="inline-flex items-center justify-center gap-1.5 rounded-lg text-white px-3 py-2 text-xs font-semibold transition cursor-pointer"
                   style={{ background: "var(--terracotta)" }}
                 >

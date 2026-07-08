@@ -13,6 +13,7 @@ import { getTemplates, templateToDesignState } from "@/lib/design-engine/templat
 export default function StorefrontPreviewPage() {
   const [design, setDesign] = useState<DesignState | null>(null);
   const [currentPageId, setCurrentPageId] = useState<string>("");
+  const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [products, setProducts] = useState<any[]>([]);
 
   // Fetch user's products for live preview
@@ -33,6 +34,36 @@ export default function StorefrontPreviewPage() {
       }
     };
     fetchProducts();
+  }, []);
+
+  // Scroll the selected section into view
+  useEffect(() => {
+    if (!selectedSectionId) return;
+    // ponytail: delay slightly to let the DOM paint the new section first
+    const timer = setTimeout(() => {
+      const element = document.querySelector(`[data-section-id="${selectedSectionId}"]`);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [selectedSectionId]);
+
+  // Intercept all link clicks inside the iframe to prevent navigating
+  useEffect(() => {
+    const handleLinkClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const anchor = target.closest("a");
+      if (anchor) {
+        e.preventDefault();
+        const href = anchor.getAttribute("href");
+        if (href) {
+          window.parent.postMessage({ type: "PREVIEW_NAVIGATE", href }, "*");
+        }
+      }
+    };
+    document.addEventListener("click", handleLinkClick);
+    return () => document.removeEventListener("click", handleLinkClick);
   }, []);
 
   // Listen for UPDATE_DESIGN messages from parent, or load template directly from query param
@@ -56,6 +87,7 @@ export default function StorefrontPreviewPage() {
       if (e.data?.type === "UPDATE_DESIGN") {
         setDesign(e.data.design);
         setCurrentPageId(e.data.currentPageId);
+        setSelectedSectionId(e.data.selectedSectionId || null);
       }
     };
     window.addEventListener("message", handler);
@@ -106,6 +138,7 @@ export default function StorefrontPreviewPage() {
       design={design}
       currentPageId={currentPageId}
       onSectionClick={handleSectionClick}
+      selectedSectionId={selectedSectionId}
       products={products}
     />
   );

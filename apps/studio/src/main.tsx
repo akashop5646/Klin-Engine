@@ -92,12 +92,17 @@ export default function DesignStudioPage() {
   useEffect(() => {
     if (!iframeRef.current?.contentWindow || !engine.isLoaded) return;
     iframeRef.current.contentWindow.postMessage(
-      { type: "UPDATE_DESIGN", design: engine.design, currentPageId: engine.editor.currentPageId },
+      {
+        type: "UPDATE_DESIGN",
+        design: engine.design,
+        currentPageId: engine.editor.currentPageId,
+        selectedSectionId: engine.editor.selectedSectionId,
+      },
       "*"
     );
-  }, [engine.design, engine.editor.currentPageId, engine.isLoaded]);
+  }, [engine.design, engine.editor.currentPageId, engine.editor.selectedSectionId, engine.isLoaded]);
 
-  // Listen for section clicks or readiness from iframe
+  // Listen for section clicks, readiness, or navigation from iframe
   useEffect(() => {
     const handler = (e: MessageEvent) => {
       if (e.data?.type === "SECTION_CLICKED") {
@@ -107,15 +112,28 @@ export default function DesignStudioPage() {
         // Send initial design state upon preview ready signal
         if (iframeRef.current?.contentWindow && engine.isLoaded) {
           iframeRef.current.contentWindow.postMessage(
-            { type: "UPDATE_DESIGN", design: engine.design, currentPageId: engine.editor.currentPageId },
+            {
+              type: "UPDATE_DESIGN",
+              design: engine.design,
+              currentPageId: engine.editor.currentPageId,
+              selectedSectionId: engine.editor.selectedSectionId,
+            },
             "*"
           );
+        }
+      } else if (e.data?.type === "PREVIEW_NAVIGATE") {
+        const href = e.data.href;
+        // Map href slug to a page config page.id
+        const slug = href === "/" ? "/" : href.replace(/^\//, "");
+        const page = engine.design.pages.find((p) => p.slug === slug || p.slug === href);
+        if (page) {
+          engine.setCurrentPage(page.id);
         }
       }
     };
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);
-  }, [engine.isLoaded, engine.design, engine.editor.currentPageId]);
+  }, [engine.isLoaded, engine.design, engine.editor.currentPageId, engine.editor.selectedSectionId]);
 
   // Device widths
   const deviceWidths: Record<DeviceMode, string> = {

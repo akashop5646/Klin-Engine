@@ -49,7 +49,7 @@ export default function StorefrontPreviewPage() {
     return () => clearTimeout(timer);
   }, [selectedSectionId]);
 
-  // Intercept all link clicks inside the iframe to prevent navigating
+  // Intercept all link clicks inside the iframe to prevent navigating (using capture phase)
   useEffect(() => {
     const handleLinkClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -62,8 +62,8 @@ export default function StorefrontPreviewPage() {
         }
       }
     };
-    document.addEventListener("click", handleLinkClick);
-    return () => document.removeEventListener("click", handleLinkClick);
+    document.addEventListener("click", handleLinkClick, true);
+    return () => document.removeEventListener("click", handleLinkClick, true);
   }, []);
 
   // Enable scrolling inside the preview iframe

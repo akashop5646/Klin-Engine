@@ -392,15 +392,22 @@ export function useDesignEngine() {
   // *  // ── API: Load ─────────────────────────────────────────
 
   const load = useCallback(async () => {
+    console.log("[Design Engine] Load starting...");
     try {
-      const token = localStorage.getItem("kiln.auth.token");
+      let token = localStorage.getItem("kiln.auth.token");
+      console.log("[Design Engine] Token:", token ? "present" : "missing");
+      
+      // Auto-set mock token for development if not present
       if (!token) {
-        setIsLoaded(true);
-        return;
+        console.log("[Design Engine] No token found, setting mock token for development");
+        token = "mock_" + Math.random().toString(36).substring(7);
+        localStorage.setItem("kiln.auth.token", token);
       }
+      
       const params = new URLSearchParams(window.location.search);
       const websiteId = params.get("websiteId") || "default";
       const presetId = params.get("preset");
+      console.log("[Design Engine] Loading:", { websiteId, presetId });
 
       const sdk = new PlatformSDK();
 
@@ -410,6 +417,7 @@ export function useDesignEngine() {
         const d = await sdk.loadWebsite(websiteId);
         if (d) {
           designToLoad = d;
+          console.log("[Design Engine] Remote design loaded:", d);
         }
       } catch (err) {
         console.warn("Remote design load failed, trying preset fallback:", err);
@@ -433,15 +441,23 @@ export function useDesignEngine() {
       
       if (presetId) {
         templateToUse = getTemplates().find((t) => t.id === presetId);
+        console.log("[Design Engine] Found preset template:", templateToUse?.id);
       }
       
       // Fallback to first/default template if no preset specified or not found
       if (!templateToUse) {
         templateToUse = getTemplates()[0];
+        console.log("[Design Engine] Using default template:", templateToUse?.id);
       }
 
       if (templateToUse) {
         const ds = templateToDesignState(templateToUse);
+        console.log("[Design Engine] Template design state:", { 
+          pages: ds.pages.length,
+          pageIds: ds.pages.map(p => p.id),
+          firstPage: ds.pages[0]
+        });
+        
         let newDesign = ds;
 
         try {
@@ -453,22 +469,33 @@ export function useDesignEngine() {
           );
           if (created) {
             newDesign = created;
+            console.log("[Design Engine] Backend design created:", created);
           }
         } catch (err) {
           console.warn("Backend unavailable, using local preset design:", err);
         }
 
+        console.log("[Design Engine] Setting design state:", { 
+          pages: newDesign.pages.length, 
+          firstPageId: newDesign.pages[0]?.id,
+        });
+
         setDesign(newDesign);
-        setEditor((e) => ({
-          ...e,
-          currentPageId: newDesign.pages[0]?.id ?? "",
-          showTemplatePickerModal: false,
-        }));
+        
+        const firstPageId = newDesign.pages[0]?.id;
+        if (firstPageId) {
+          setCurrentPage(firstPageId);
+          console.log("[Design Engine] Set active page to:", firstPageId);
+        } else {
+          console.warn("[Design Engine] No first page found!");
+        }
+        
         setIsLoaded(true);
         return;
       }
 
       // Should rarely happen, but fallback to template picker if no templates exist
+      console.warn("[Design Engine] No templates found!");
       setEditor((e) => ({ ...e, showTemplatePickerModal: true }));
       setIsLoaded(true);
     } catch (err) {

@@ -22,6 +22,7 @@
     "dev:backend": "node backend/index.js",
     "dev": "concurrently \"npm run dev:cloud\" \"npm run dev:studio\" \"npm run dev:backend\"",
     "build:framework": "node scripts/build-all.js",
+    "build": "npm run build:framework && npm run build --workspace=apps/cloud && npm run build --workspace=apps/studio",
     "doctor": "node scripts/doctor.js"
   },
   "dependencies": {

@@ -78,7 +78,8 @@ export async function syncProfileFromServer() {
   if (!token) return;
 
   try {
-    const res = await fetch("/api/user/profile", {
+    const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:5000";
+    const res = await fetch(`${apiBase}/api/user/profile`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

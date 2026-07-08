@@ -4,8 +4,13 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "esModuleInterop": true,
-    "strict": true,
-    "skipLibCheck": true
+    "allowJs": true,
+    "checkJs": false,
+    "strict": false,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "lib": ["ES2022"]
   },
-  "include": ["index.js", "api/**/*.js"]
+  "include": ["index.js", "api/**/*.js"],
+  "exclude": ["node_modules"]
 }

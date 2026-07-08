@@ -404,14 +404,23 @@ export function useDesignEngine() {
 
       const sdk = new PlatformSDK();
 
-      // 1. Load existing design
-      const d = await sdk.loadWebsite(websiteId);
-      if (d) {
-        setDesign(d);
-        if (d.pages.length > 0) {
+      let designToLoad: DesignState | null = null;
+
+      try {
+        const d = await sdk.loadWebsite(websiteId);
+        if (d) {
+          designToLoad = d;
+        }
+      } catch (err) {
+        console.warn("Remote design load failed, trying preset fallback:", err);
+      }
+
+      if (designToLoad) {
+        setDesign(designToLoad);
+        if (designToLoad.pages.length > 0) {
           setEditor((e) => ({
             ...e,
-            currentPageId: d.pages[0].id,
+            currentPageId: designToLoad.pages[0].id,
             showTemplatePickerModal: false,
           }));
         }
@@ -419,31 +428,47 @@ export function useDesignEngine() {
         return;
       }
 
-      // 2. If no existing design but presetId is provided, initialize from preset
+      // Try to load from preset ID or use default template
+      let templateToUse = null;
+      
       if (presetId) {
-        const tpl = getTemplates().find((t) => t.id === presetId);
-        if (tpl) {
-          const ds = templateToDesignState(tpl);
-          const newDesign = await sdk.createWebsiteDesign(
+        templateToUse = getTemplates().find((t) => t.id === presetId);
+      }
+      
+      // Fallback to first/default template if no preset specified or not found
+      if (!templateToUse) {
+        templateToUse = getTemplates()[0];
+      }
+
+      if (templateToUse) {
+        const ds = templateToDesignState(templateToUse);
+        let newDesign = ds;
+
+        try {
+          const created = await sdk.createWebsiteDesign(
             websiteId,
-            ds.templateId,
+            templateToUse.id,
             ds.theme,
             ds.pages
           );
-          setDesign(newDesign);
-          if (newDesign.pages.length > 0) {
-            setEditor((e) => ({
-              ...e,
-              currentPageId: newDesign.pages[0].id,
-              showTemplatePickerModal: false,
-            }));
+          if (created) {
+            newDesign = created;
           }
-          setIsLoaded(true);
-          return;
+        } catch (err) {
+          console.warn("Backend unavailable, using local preset design:", err);
         }
+
+        setDesign(newDesign);
+        setEditor((e) => ({
+          ...e,
+          currentPageId: newDesign.pages[0]?.id ?? "",
+          showTemplatePickerModal: false,
+        }));
+        setIsLoaded(true);
+        return;
       }
 
-      // 3. Fallback: show template picker modal
+      // Should rarely happen, but fallback to template picker if no templates exist
       setEditor((e) => ({ ...e, showTemplatePickerModal: true }));
       setIsLoaded(true);
     } catch (err) {

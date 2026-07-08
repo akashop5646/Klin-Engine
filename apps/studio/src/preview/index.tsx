@@ -19,7 +19,7 @@ export default function StorefrontPreviewPage() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("kiln.auth.token");
         if (!token) return;
         const res = await fetch("/api/products", {
           headers: { Authorization: `Bearer ${token}` },

@@ -53,6 +53,25 @@ function SignupPage() {
     try {
       setLoading(true);
       setErr(null);
+
+      // Handle mock developer auth
+      if (response.credential === "mock_developer") {
+        const mockToken = "mock_" + Math.random().toString(36).substring(7);
+        const mockUser = {
+          id: "mock-user-" + Date.now(),
+          email: "dev@example.com",
+          name: "Developer",
+          onboarding: {},
+        };
+        
+        localStorage.setItem("kiln.auth.token", mockToken);
+        localStorage.setItem("kiln.auth.user", JSON.stringify(mockUser));
+        setOnboarding(mockUser.onboarding || {});
+        navigate("/onboarding");
+        return;
+      }
+
+      // Real Google OAuth
       const res = await fetch("/api/auth/google/verify", {
         method: "POST",
         headers: {
@@ -474,6 +493,15 @@ function SignupPage() {
                       className="absolute inset-0 opacity-0 cursor-pointer pointer-events-auto [&>div]:w-full [&>div]:h-full [&_iframe]:cursor-pointer"
                     />
                   </div>
+                  
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={handleMockSignIn}
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-full border border-yellow-600 bg-yellow-50 dark:bg-yellow-950 px-4 py-3 text-sm font-medium hover:bg-yellow-100 dark:hover:bg-yellow-900 transition-all active:scale-98 text-yellow-900 dark:text-yellow-100"
+                  >
+                    ⚠️ Dev Login (mock auth)
+                  </button>
                 </div>
 
                 <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
@@ -564,6 +592,15 @@ function SignupPage() {
                       className="absolute inset-0 opacity-0 cursor-pointer pointer-events-auto [&>div]:w-full [&>div]:h-full [&_iframe]:cursor-pointer"
                     />
                   </div>
+                  
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={handleMockSignIn}
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-full border border-yellow-600 bg-yellow-50 dark:bg-yellow-950 px-4 py-3 text-sm font-medium hover:bg-yellow-100 dark:hover:bg-yellow-900 transition-all active:scale-98 text-yellow-900 dark:text-yellow-100"
+                  >
+                    ⚠️ Dev Login (mock auth)
+                  </button>
                 </div>
 
                 <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">

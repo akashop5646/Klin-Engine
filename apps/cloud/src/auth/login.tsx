@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import {
   ArrowRight,
@@ -16,9 +16,16 @@ import { useInView } from "@/hooks/use-in-view";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Landing() {
+  const navigate = useNavigate();
+
   useEffect(() => {
     document.title = "Kiln — Start, run, and grow your business";
-  }, []);
+    const token = localStorage.getItem("kiln.auth.token");
+    if (token) {
+      navigate("/dashboard/online-store");
+    }
+  }, [navigate]);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
@@ -442,6 +449,12 @@ function HowItWorks() {
 /* ────────────────────────────────────────────── Header */
 
 function SiteHeader() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setIsLoggedIn(!!localStorage.getItem("kiln.auth.token"));
+  }, []);
+
   return (
     <header className="fixed top-4 left-0 right-0 z-50 mx-auto max-w-7xl px-6">
       <div className="flex h-16 items-center justify-between rounded-full border border-border/80 bg-background/75 px-8 shadow-[var(--shadow-soft)] backdrop-blur-xl transition-all duration-300">
@@ -456,19 +469,31 @@ function SiteHeader() {
           <a href="#stories" className="hover:text-foreground transition-colors relative after:absolute after:bottom-[-4px] after:left-0 after:h-[2px] after:w-0 after:bg-[var(--terracotta)] hover:after:w-full after:transition-all after:duration-300">Stories</a>
         </nav>
         <div className="flex items-center gap-4">
-          <Link
-            to="/signup?mode=login"
-            className="hidden text-sm font-medium text-muted-foreground hover:text-foreground md:block transition-colors"
-          >
-            Log in
-          </Link>
-          <Link
-            to="/signup?src=header"
-            className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-all hover:bg-foreground/90 hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] active:scale-95 hover-scale"
-          >
-            Start free trial
-            <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
+          {isLoggedIn ? (
+            <Link
+              to="/dashboard/online-store"
+              className="inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] active:scale-95 hover-scale"
+            >
+              Go to Dashboard
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          ) : (
+            <>
+              <Link
+                to="/signup?mode=login"
+                className="hidden text-sm font-medium text-muted-foreground hover:text-foreground md:block transition-colors"
+              >
+                Log in
+              </Link>
+              <Link
+                to="/signup?src=header"
+                className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-all hover:bg-foreground/90 hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] active:scale-95 hover-scale"
+              >
+                Start free trial
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>
@@ -491,6 +516,12 @@ function Logo() {
 /* ────────────────────────────────────────────── Hero */
 
 function Hero() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setIsLoggedIn(!!localStorage.getItem("kiln.auth.token"));
+  }, []);
+
   return (
     <section className="relative min-h-[90vh] lg:min-h-[85vh] flex flex-col items-center justify-center overflow-hidden px-6 pt-32 pb-24 text-center border-b border-border/40 bg-zinc-950">
       <video
@@ -559,13 +590,23 @@ function Hero() {
             transition={{ type: "spring", stiffness: 500, damping: 15 }}
             className="w-full sm:w-auto"
           >
-            <Link
-              to="/signup?src=hero"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-white px-8 py-4 text-base font-semibold text-black hover:bg-white/95 transition-all hover:shadow-[0_4px_25px_rgba(255,255,255,0.2)]"
-            >
-              Start free trial
-              <ArrowRight className="h-4 w-4" />
-            </Link>
+            {isLoggedIn ? (
+              <Link
+                to="/dashboard/online-store"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-white px-8 py-4 text-base font-semibold text-black hover:bg-white/95 transition-all hover:shadow-[0_4px_25px_rgba(255,255,255,0.2)]"
+              >
+                Go to Dashboard
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            ) : (
+              <Link
+                to="/signup?src=hero"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-white px-8 py-4 text-base font-semibold text-black hover:bg-white/95 transition-all hover:shadow-[0_4px_25px_rgba(255,255,255,0.2)]"
+              >
+                Start free trial
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            )}
           </motion.div>
           <motion.button
             whileHover={{ scale: 1.04, rotate: 0.5 }}

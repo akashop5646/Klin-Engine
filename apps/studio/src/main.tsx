@@ -319,9 +319,70 @@ export default function DesignStudioPage() {
 // ─── Sub-Components ────────────────────────────────────────
 
 function PagesPanel({ engine }: { engine: ReturnType<typeof useDesignEngine> }) {
+  const [showAddPageInput, setShowAddPageInput] = useState(false);
+  const [newPageTitle, setNewPageTitle] = useState("");
+
+  const handleAddPage = () => {
+    if (!newPageTitle.trim()) return;
+    const slug = newPageTitle.toLowerCase().trim().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+    engine.addPage(newPageTitle.trim(), slug || undefined);
+    setNewPageTitle("");
+    setShowAddPageInput(false);
+  };
+
   return (
     <div>
-      <h3 style={S.panelTitle}>Pages</h3>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+        <h3 style={S.panelTitle}>Pages</h3>
+        <button
+          style={S.addBtn}
+          onClick={() => setShowAddPageInput(!showAddPageInput)}
+        >
+          <Plus size={14} />
+          Add
+        </button>
+      </div>
+
+      {showAddPageInput && (
+        <div style={{ display: "flex", gap: "6px", marginBottom: "12px" }}>
+          <input
+            type="text"
+            placeholder="Page title..."
+            value={newPageTitle}
+            onChange={(e) => setNewPageTitle(e.target.value)}
+            style={{
+              flex: 1,
+              background: "#1E1E24",
+              border: "1px solid #2D2D34",
+              borderRadius: "6px",
+              padding: "6px 10px",
+              fontSize: "0.8125rem",
+              color: "#FAFAFA",
+              outline: "none",
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleAddPage();
+            }}
+            autoFocus
+          />
+          <button
+            onClick={handleAddPage}
+            style={{
+              background: "#3B82F6",
+              border: "none",
+              borderRadius: "6px",
+              color: "#FFF",
+              padding: "6px 10px",
+              fontSize: "0.8125rem",
+              fontWeight: 500,
+              cursor: "pointer",
+            }}
+          >
+            Add
+          </button>
+        </div>
+      )}
+
       <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
         {engine.design.pages.map((page) => (
           <button

@@ -49,6 +49,13 @@ function SignupPage() {
   const [err, setErr] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  useEffect(() => {
+    const token = localStorage.getItem("kiln.auth.token");
+    if (token) {
+      navigate("/dashboard/online-store");
+    }
+  }, [navigate]);
+
   const handleCredentialResponse = async (response: any) => {
     try {
       setLoading(true);

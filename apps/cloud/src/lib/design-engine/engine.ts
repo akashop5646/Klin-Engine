@@ -157,6 +157,25 @@ export function useDesignEngine() {
     }));
   }, []);
 
+  const addPage = useCallback(
+    (title: string, slug?: string) => {
+      const pageId = generateId("page");
+      const newPage: PageConfig = {
+        id: pageId,
+        title,
+        slug: slug || title.toLowerCase().trim().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""),
+        isVisible: true,
+        sections: [],
+      };
+      mutateDesign((d) => ({
+        ...d,
+        pages: [...d.pages, newPage],
+      }));
+      setCurrentPage(pageId);
+    },
+    [mutateDesign, setCurrentPage]
+  );
+
   const updatePage = useCallback(
     (pageId: string, updates: Partial<PageConfig>) => {
       mutateDesign((d) => ({
@@ -628,6 +647,7 @@ export function useDesignEngine() {
 
     // Pages
     setCurrentPage,
+    addPage,
     updatePage,
 
     // Sections

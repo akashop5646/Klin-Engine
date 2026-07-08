@@ -1,0 +1,23 @@
+{
+  "name": "@klin/templates",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "echo 'Linting templates...'",
+    "test": "echo 'No tests'"
+  },
+  "dependencies": {
+    "@klin/core": "*",
+    "@klin/shared": "*",
+    "@klin/schemas": "*",
+    "@klin/theme": "*",
+    "@klin/blocks": "*",
+    "@klin/registry": "*",
+    "@klin/event-bus": "*",
+    "@klin/builder-core": "*",
+    "react": "^18.3.1"
+  }
+}

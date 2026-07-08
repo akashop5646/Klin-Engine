@@ -1,0 +1,15 @@
+{
+  "name": "@klin/compiler",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "echo 'Linting compiler...'",
+    "test": "echo 'No tests'"
+  },
+  "dependencies": {
+    "@klin/core": "*"
+  }
+}

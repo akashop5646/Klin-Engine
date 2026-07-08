@@ -1,0 +1,19 @@
+{
+  "version": "1.0.0",
+  "packages": [
+    "@klin/core",
+    "@klin/runtime",
+    "@klin/data",
+    "@klin/theme",
+    "@klin/blocks",
+    "@klin/pages",
+    "@klin/templates",
+    "@klin/builder",
+    "@klin/renderer",
+    "@klin/platform",
+    "@klin/commerce",
+    "@klin/devtools"
+  ],
+  "sdk": "@klin/sdk",
+  "cli": "@klin/cli"
+}

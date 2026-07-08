@@ -1,0 +1,31 @@
+{
+  "id": "klin-button",
+  "name": "Button",
+  "category": "Atoms",
+  "subcategory": "Actions",
+  "version": "1.0.0",
+  "author": "Klin Team",
+  "license": "MIT",
+  "description": "A versatile button component supporting multiple variants, sizes, shapes, and states. Fully accessible and theme-aware.",
+  "keywords": ["button", "btn", "action", "click", "submit", "cta", "call-to-action"],
+  "tags": ["ui", "atom", "interactive", "form"],
+  "icon": "mouse-pointer-click",
+  "thumbnail": "assets/button-preview.png",
+  "dependencies": {
+    "@klin/theme": ">=1.0.0"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "requiredCoreVersion": ">=1.0.0",
+  "requiredThemeVersion": ">=1.0.0",
+  "requiredBuilderVersion": ">=1.0.0",
+  "supportedModes": ["Light", "Dark", "HighContrast", "Print", "Editor"],
+  "supportedPlatforms": ["Builder", "Preview", "Storefront"],
+  "status": "stable",
+  "deprecated": false,
+  "experimental": false,
+  "documentation": "packages/ui/button/README.md",
+  "examples": ["Primary", "Secondary", "Outline", "Ghost", "Link", "Success", "Warning", "Danger"]
+}

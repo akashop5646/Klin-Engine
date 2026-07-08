@@ -1,0 +1,7 @@
+{
+  "name": "@klin/renderer",
+  "version": "1.0.0",
+  "compatible": [
+    "@klin/core>=1.0.0"
+  ]
+}

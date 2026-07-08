@@ -1,0 +1,24 @@
+{
+  "name": "@klin/blocks",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "echo 'Linting blocks...'",
+    "test": "echo 'No tests'"
+  },
+  "dependencies": {
+    "@klin/core": "*",
+    "@klin/shared": "*",
+    "@klin/schemas": "*",
+    "@klin/theme": "*",
+    "@klin/ui": "*",
+    "@klin/registry": "*",
+    "@klin/event-bus": "*",
+    "@klin/builder-core": "*",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
+}

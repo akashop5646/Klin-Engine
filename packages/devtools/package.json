@@ -1,0 +1,26 @@
+{
+  "name": "@klin/devtools",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "echo 'Linting devtools...'",
+    "test": "echo 'No tests'"
+  },
+  "dependencies": {
+    "@klin/core": "*",
+    "@klin/data": "*",
+    "@klin/platform": "*",
+    "@klin/builder": "*",
+    "@klin/renderer": "*",
+    "@klin/templates": "*",
+    "@klin/pages": "*",
+    "@klin/theme": "*",
+    "@klin/blocks": "*",
+    "@klin/commerce": "*",
+    "@klin/event-bus": "*",
+    "typescript": "^5.0.0"
+  }
+}

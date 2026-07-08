@@ -1,0 +1,25 @@
+{
+  "name": "@klin/ui",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "echo 'Linting ui...'",
+    "test": "echo 'No tests'"
+  },
+  "dependencies": {
+    "@klin/core": "*",
+    "@klin/config": "*",
+    "@klin/shared": "*",
+    "@klin/schemas": "*",
+    "@klin/theme": "*",
+    "@klin/registry": "*",
+    "@klin/event-bus": "*"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  }
+}

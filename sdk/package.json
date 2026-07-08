@@ -1,0 +1,20 @@
+{
+  "name": "@klin/sdk",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@klin/core": "*",
+    "@klin/platform": "*",
+    "@klin/builder": "*",
+    "@klin/renderer": "*",
+    "@klin/commerce": "*",
+    "@klin/theme": "*",
+    "@klin/data": "*",
+    "@klin/runtime": "*"
+  }
+}

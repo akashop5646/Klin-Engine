@@ -1,0 +1,10 @@
+{
+  "name": "klin-starter-blank",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@klin/core": "*",
+    "@klin/runtime": "*",
+    "@klin/sdk": "*"
+  }
+}

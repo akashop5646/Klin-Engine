@@ -1,0 +1,24 @@
+{
+  "name": "@klin/renderer",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "echo 'Linting renderer...'",
+    "test": "echo 'No tests'"
+  },
+  "dependencies": {
+    "@klin/core": "*",
+    "@klin/shared": "*",
+    "@klin/schemas": "*",
+    "@klin/theme": "*",
+    "@klin/registry": "*",
+    "@klin/event-bus": "*",
+    "@klin/pages": "*"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  }
+}

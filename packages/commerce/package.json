@@ -1,0 +1,23 @@
+{
+  "name": "@klin/commerce",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "echo 'Linting commerce...'",
+    "test": "echo 'No tests'"
+  },
+  "dependencies": {
+    "@klin/core": "*",
+    "@klin/data": "*",
+    "@klin/platform": "*",
+    "@klin/renderer": "*",
+    "@klin/theme": "*",
+    "@klin/event-bus": "*"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  }
+}

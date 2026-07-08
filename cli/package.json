@@ -1,0 +1,19 @@
+{
+  "name": "@klin/cli",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "klin": "./dist/main.js"
+  },
+  "main": "./src/main.ts",
+  "types": "./src/main.ts",
+  "scripts": {
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@klin/core": "*",
+    "@klin/runtime": "*",
+    "@klin/sdk": "*"
+  }
+}

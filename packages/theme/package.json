@@ -1,0 +1,20 @@
+{
+  "name": "@klin/theme",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "echo 'Linting theme...'",
+    "test": "echo 'No tests'"
+  },
+  "dependencies": {
+    "@klin/core": "*",
+    "@klin/config": "*",
+    "@klin/shared": "*",
+    "@klin/schemas": "*",
+    "@klin/event-bus": "*",
+    "@klin/registry": "*"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "@klin/pages",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "echo 'Linting pages...'",
+    "test": "echo 'No tests'"
+  },
+  "dependencies": {
+    "@klin/core": "*",
+    "@klin/shared": "*",
+    "@klin/schemas": "*",
+    "@klin/theme": "*",
+    "@klin/blocks": "*",
+    "@klin/templates": "*",
+    "@klin/registry": "*",
+    "@klin/event-bus": "*",
+    "@klin/builder-core": "*"
+  }
+}

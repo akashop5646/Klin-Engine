@@ -1,0 +1,14 @@
+{
+  "extends": "../../tooling/typescript/tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*"
+  ]
+}

@@ -1,0 +1,15 @@
+export const BuilderCoreEvents = {
+  INITIALIZED: "builder.initialized",
+  LOADED: "builder.loaded",
+  SELECTION_CHANGED: "builder.selection.changed",
+  HISTORY_UPDATED: "builder.history.updated",
+  VIEWPORT_CHANGED: "builder.viewport.changed",
+  ZOOM_CHANGED: "builder.zoom.changed",
+  CLIPBOARD_UPDATED: "builder.clipboard.updated",
+  AUTOSAVE_STARTED: "builder.autosave.started",
+  AUTOSAVE_COMPLETED: "builder.autosave.completed",
+  PLUGIN_LOADED: "builder.plugin.loaded",
+  SHORTCUT_EXECUTED: "builder.shortcut.executed",
+  PROJECT_LOADED: "builder.project.loaded",
+  PROJECT_SAVED: "builder.project.saved",
+};

@@ -1,0 +1,10 @@
+{
+  "version": "1.0.0",
+  "registries": {
+    "blocks": "./blocks",
+    "themes": "./themes",
+    "templates": "./templates",
+    "plugins": "./plugins",
+    "versions": "./versions"
+  }
+}

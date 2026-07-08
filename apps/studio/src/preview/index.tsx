@@ -66,6 +66,12 @@ export default function StorefrontPreviewPage() {
     return () => document.removeEventListener("click", handleLinkClick);
   }, []);
 
+  // Enable scrolling inside the preview iframe
+  useEffect(() => {
+    document.body.classList.remove("overflow-hidden");
+    document.body.style.overflow = "auto";
+  }, []);
+
   // Listen for UPDATE_DESIGN messages from parent, or load template directly from query param
   useEffect(() => {
     // ponytail: notify parent that the iframe is ready to receive state

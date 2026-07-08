@@ -96,6 +96,100 @@ export class WorkspaceController {
   }
 }
 
+export class WebsiteController {
+  async list(req, res) {
+    try {
+      const user = await User.findById(req.user.id);
+      const workspaceId = user ? user.activeWorkspaceId : null;
+      if (!workspaceId) {
+        return res.json({ websites: [] });
+      }
+      const websites = await Website.find({ workspaceId }).sort({ createdAt: -1 }).lean();
+      
+      const mapped = websites.map((w) => ({
+        id: w._id,
+        name: w.name,
+        status: w.status,
+        theme: "Clean Modern",
+        templateId: w.templateId || "classic-denim",
+        domain: w.activeDomain || `${w.slug}.klin.site`,
+        deletedFromDraft: w.deletedFromDraft || false,
+        deletedFromPublished: w.deletedFromPublished || false,
+        deletedFromArchived: w.deletedFromArchived || false,
+        updated: "Just now",
+      }));
+      
+      res.json({ websites: mapped });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+
+  async create(req, res) {
+    const { id, name, templateId, theme } = req.body;
+    if (!name) {
+      return res.status(400).json({ error: "Website name is required" });
+    }
+    try {
+      const user = await User.findById(req.user.id);
+      const workspaceId = user ? user.activeWorkspaceId : null;
+      if (!workspaceId) {
+        return res.status(400).json({ error: "Active workspace not found" });
+      }
+      const activeId = id || `site-${Date.now()}`;
+      const website = await Website.create({
+        _id: activeId,
+        name,
+        slug: activeId,
+        workspaceId,
+        templateId: templateId || "classic-denim",
+        status: "Draft",
+      });
+      res.status(201).json({ website });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+
+  async update(req, res) {
+    const { id } = req.params;
+    const { name, status, deletedFromDraft, deletedFromPublished, deletedFromArchived } = req.body;
+    try {
+      const updateData = {};
+      if (name !== undefined) updateData.name = name;
+      if (status !== undefined) updateData.status = status;
+      if (deletedFromDraft !== undefined) updateData.deletedFromDraft = deletedFromDraft;
+      if (deletedFromPublished !== undefined) updateData.deletedFromPublished = deletedFromPublished;
+      if (deletedFromArchived !== undefined) updateData.deletedFromArchived = deletedFromArchived;
+
+      const website = await Website.findOneAndUpdate(
+        { _id: id },
+        { $set: updateData },
+        { new: true }
+      );
+      if (!website) {
+        return res.status(404).json({ error: "Website not found" });
+      }
+      res.json({ website });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+
+  async delete(req, res) {
+    const { id } = req.params;
+    try {
+      const website = await Website.findOneAndDelete({ _id: id });
+      if (!website) {
+        return res.status(404).json({ error: "Website not found" });
+      }
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+}
+
 export class StoreDesignController {
   async get(req, res) {
     try {

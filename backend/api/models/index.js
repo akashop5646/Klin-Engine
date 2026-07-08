@@ -42,6 +42,9 @@ const WebsiteSchema = new Schema({
   activeDomain: { type: String },
   customDomains: [{ type: String }],
   status: { type: String, enum: ["Draft", "Published", "Archived"], default: "Draft" },
+  deletedFromDraft: { type: Boolean, default: false },
+  deletedFromPublished: { type: Boolean, default: false },
+  deletedFromArchived: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 });
 

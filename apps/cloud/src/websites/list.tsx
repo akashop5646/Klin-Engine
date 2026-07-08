@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Globe, Palette, Layout, Smartphone, ExternalLink, Settings, Sparkles, Check, ArrowRight, Plus, Trash2, Copy, Send, X, Layers, Languages, HelpCircle } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard-layout";
@@ -14,18 +14,50 @@ interface UserWebsite {
   templateId: string;
   domain: string;
   updated: string;
+  deletedFromDraft: boolean;
+  deletedFromPublished: boolean;
+  deletedFromArchived: boolean;
+}
+
+// Helper: get the auth token
+function getToken(): string {
+  return localStorage.getItem("kiln.auth.token") || "";
+}
+
+// Helper: fetch all websites from API
+async function fetchWebsitesFromAPI(): Promise<UserWebsite[]> {
+  const token = getToken();
+  if (!token) return [];
+  try {
+    const res = await fetch("/api/websites", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.websites || []).map((w: any) => ({
+      id: w.id,
+      name: w.name,
+      status: w.status || "Draft",
+      theme: w.theme || "Clean Modern",
+      templateId: w.templateId || "classic-denim",
+      domain: w.domain || `${w.id}.klin.site`,
+      updated: w.updated || "Just now",
+      deletedFromDraft: w.deletedFromDraft || false,
+      deletedFromPublished: w.deletedFromPublished || false,
+      deletedFromArchived: w.deletedFromArchived || false,
+    }));
+  } catch {
+    return [];
+  }
 }
 
 export default function OnlineStorePage() {
   const navigate = useNavigate();
-  const [userId, setUserId] = useState<string>("");
   const templates = getTemplates();
 
-  // Active website lists
-  const [websites, setWebsites] = useState<UserWebsite[]>([
-    { id: "site-101", name: "Fashion Essentials Hub", status: "Published", theme: "Modern Dark", templateId: "streetwear-capsule", domain: "fashion.klin.site", updated: "2 mins ago" },
-    { id: "site-102", name: "Wellness Lounge", status: "Draft", theme: "Pastel Warm", templateId: "classic-denim", domain: "wellness.klin.site", updated: "1 hour ago" },
-  ]);
+  // Website state loaded from API
+  const [websites, setWebsites] = useState<UserWebsite[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Filters
   const [filterTab, setFilterTab] = useState<"all" | "Draft" | "Published" | "Archived">("all");
@@ -50,17 +82,20 @@ export default function OnlineStorePage() {
   const [seoTitle, setSeoTitle] = useState("");
   const [seoDesc, setSeoDesc] = useState("");
 
-  useEffect(() => {
-    document.title = "Online Store · Kiln";
-    try {
-      const rawUser = localStorage.getItem("kiln.auth.user");
-      if (rawUser) {
-        const u = JSON.parse(rawUser);
-        if (u?.id) setUserId(u.id);
-      }
-    } catch {}
+  // Load websites from API on mount
+  const loadWebsites = useCallback(async () => {
+    setIsLoading(true);
+    const sites = await fetchWebsitesFromAPI();
+    setWebsites(sites);
+    setIsLoading(false);
   }, []);
 
+  useEffect(() => {
+    document.title = "Online Store · Kiln";
+    loadWebsites();
+  }, [loadWebsites]);
+
+  // ── Create Website ────────────────────────────────────
   const handleCreateWebsite = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!webName.trim()) {
@@ -70,62 +105,134 @@ export default function OnlineStorePage() {
 
     const cloner = new WebsiteClone();
     const clonedId = cloner.cloneWebsiteInstance(selectedTemplate);
-    
-    // Initialize the design in the database immediately!
-    const tpl = getTemplates().find((t) => t.id === selectedTemplate);
+
+    // Create website record in database
+    const token = getToken();
+    try {
+      await fetch("/api/websites", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          id: clonedId,
+          name: webName,
+          templateId: selectedTemplate,
+          theme: selectedTheme,
+        }),
+      });
+    } catch (err) {
+      console.error("Failed to create website record:", err);
+    }
+
+    // Initialize the design in the database
+    const tpl = templates.find((t) => t.id === selectedTemplate);
     if (tpl) {
       try {
         const ds = templateToDesignState(tpl);
         const sdk = new PlatformSDK();
-        await sdk.createWebsiteDesign(
-          clonedId,
-          ds.templateId,
-          ds.theme,
-          ds.pages
-        );
+        await sdk.createWebsiteDesign(clonedId, ds.templateId, ds.theme, ds.pages);
         console.log(`Successfully initialized store design in database for website: ${clonedId}`);
       } catch (err) {
         console.error("Failed to initialize design in database:", err);
       }
     }
 
-    const newSite: UserWebsite = {
-      id: clonedId,
-      name: webName,
-      status: "Draft",
-      theme: selectedTheme,
-      templateId: selectedTemplate,
-      domain: `${webName.toLowerCase().replace(/\s+/g, "-")}.klin.site`,
-      updated: "Just now",
-    };
-
-    setWebsites(prev => [...prev, newSite]);
     setShowWizard(false);
-
-    // Redirect directly to website control panel detailed page route
+    await loadWebsites();
     navigate(`/dashboard/online-store/${clonedId}`);
   };
 
-  const handleDuplicate = (id: string) => {
+  // ── Duplicate Website ─────────────────────────────────
+  const handleDuplicate = async (id: string) => {
     const original = websites.find(w => w.id === id);
-    if (original) {
-      const newSite: UserWebsite = {
-        ...original,
-        id: `site-${Date.now()}`,
-        name: `${original.name} (Copy)`,
-        status: "Draft",
-        updated: "Just now"
-      };
-      setWebsites(prev => [...prev, newSite]);
+    if (!original) return;
+
+    const cloner = new WebsiteClone();
+    const newId = cloner.cloneWebsiteInstance(original.templateId);
+    const token = getToken();
+
+    try {
+      await fetch("/api/websites", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          id: newId,
+          name: `${original.name} (Copy)`,
+          templateId: original.templateId,
+          theme: original.theme,
+        }),
+      });
+    } catch (err) {
+      console.error("Failed to duplicate website:", err);
     }
+
+    await loadWebsites();
   };
 
-  const handleDelete = (id: string) => {
-    setWebsites(prev => prev.filter(w => w.id !== id));
+  // ── Delete Website ────────────────────────────────────
+  // From "All Sites" tab: permanent delete via API
+  // From status tabs: mark deletedFrom<Status> flag via API
+  const handleDelete = async (id: string) => {
+    const token = getToken();
+
+    if (filterTab === "all") {
+      // Permanent delete
+      try {
+        await fetch(`/api/websites/${id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } catch (err) {
+        console.error("Failed to delete website:", err);
+      }
+    } else {
+      // Soft-delete: mark hidden from this specific tab
+      const flagMap: Record<string, string> = {
+        Draft: "deletedFromDraft",
+        Published: "deletedFromPublished",
+        Archived: "deletedFromArchived",
+      };
+      const flag = flagMap[filterTab];
+      if (flag) {
+        try {
+          await fetch(`/api/websites/${id}`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ [flag]: true }),
+          });
+        } catch (err) {
+          console.error("Failed to soft-delete website:", err);
+        }
+      }
+    }
+
+    await loadWebsites();
   };
 
+  // ── Filtered Websites ─────────────────────────────────
+  // "All Sites"    => show every website (regardless of deletion flags)
+  // "Draft"        => status=Draft AND deletedFromDraft=false
+  // "Published"    => status=Published AND deletedFromPublished=false
+  // "Archived"     => status=Archived AND deletedFromArchived=false
   const filteredWebsites = useMemo(() => {
-    return websites.filter(w => filterTab === "all" || w.status === filterTab);
+    if (filterTab === "all") {
+      return websites;
+    }
+    return websites.filter(w => {
+      if (w.status !== filterTab) return false;
+      if (filterTab === "Draft" && w.deletedFromDraft) return false;
+      if (filterTab === "Published" && w.deletedFromPublished) return false;
+      if (filterTab === "Archived" && w.deletedFromArchived) return false;
+      return true;
+    });
   }, [websites, filterTab]);
 
   return (
@@ -165,7 +272,12 @@ export default function OnlineStorePage() {
 
       {/* Websites Grid */}
       <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {filteredWebsites.length === 0 ? (
+        {isLoading ? (
+          <div className="sm:col-span-2 lg:col-span-3 text-center py-16 text-muted-foreground">
+            <div className="h-6 w-6 mx-auto mb-3 border-2 border-muted-foreground/30 border-t-muted-foreground rounded-full animate-spin" />
+            <p>Loading websites...</p>
+          </div>
+        ) : filteredWebsites.length === 0 ? (
           <div className="sm:col-span-2 lg:col-span-3 text-center py-16 text-muted-foreground">
             <Globe className="h-10 w-10 mx-auto opacity-30 mb-2" />
             <p>No websites found in this category.</p>
@@ -174,7 +286,13 @@ export default function OnlineStorePage() {
           filteredWebsites.map(site => (
             <div key={site.id} className="rounded-2xl border border-border bg-card p-5 space-y-4 hover:shadow-md transition">
               <div>
-                <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border uppercase ${site.status === "Published" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-yellow-500/10 text-yellow-600 border-yellow-500/20"}`}>
+                <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border uppercase ${
+                  site.status === "Published" 
+                    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" 
+                    : site.status === "Archived"
+                    ? "bg-gray-500/10 text-gray-500 border-gray-500/20"
+                    : "bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
+                }`}>
                   {site.status}
                 </span>
                 <h3 className="font-display text-lg mt-3 text-foreground font-semibold">{site.name}</h3>
@@ -196,7 +314,7 @@ export default function OnlineStorePage() {
                 </button>
                 <button
                   onClick={() => {
-                    const token = localStorage.getItem("kiln.auth.token") || "";
+                    const token = getToken();
                     window.open(`http://localhost:8081/builder/${site.id}?preset=${site.templateId}&token=${token}`, "_blank");
                   }}
                   className="inline-flex items-center justify-center gap-1.5 rounded-lg text-white px-3 py-2 text-xs font-semibold transition cursor-pointer"
@@ -218,7 +336,7 @@ export default function OnlineStorePage() {
                 <button 
                   onClick={() => handleDelete(site.id)}
                   className="p-1.5 rounded hover:bg-red-50 hover:text-red-500 text-muted-foreground transition-colors cursor-pointer"
-                  title="Delete site"
+                  title={filterTab === "all" ? "Permanently delete site" : `Remove from ${filterTab}`}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
@@ -409,4 +527,3 @@ export default function OnlineStorePage() {
     </DashboardLayout>
   );
 }
-

@@ -1,11 +1,12 @@
 import express from "express";
 import jwt from "jsonwebtoken";
-import { AuthController, WorkspaceController, StoreDesignController } from "../controllers/index.js";
+import { AuthController, WorkspaceController, StoreDesignController, WebsiteController } from "../controllers/index.js";
 
 const router = express.Router();
 const authCtrl = new AuthController();
 const workspaceCtrl = new WorkspaceController();
 const designCtrl = new StoreDesignController();
+const websiteCtrl = new WebsiteController();
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_for_development";
 
@@ -37,6 +38,12 @@ router.post("/auth/login", (req, res) => authCtrl.login(req, res));
 router.get("/workspaces", authenticateToken, (req, res) => workspaceCtrl.list(req, res));
 router.post("/workspaces", authenticateToken, (req, res) => workspaceCtrl.create(req, res));
 router.post("/workspaces/switch", authenticateToken, (req, res) => workspaceCtrl.switch(req, res));
+
+// Website routes
+router.get("/websites", authenticateToken, (req, res) => websiteCtrl.list(req, res));
+router.post("/websites", authenticateToken, (req, res) => websiteCtrl.create(req, res));
+router.patch("/websites/:id", authenticateToken, (req, res) => websiteCtrl.update(req, res));
+router.delete("/websites/:id", authenticateToken, (req, res) => websiteCtrl.delete(req, res));
 
 // Store Design routes
 router.get("/store-design", authenticateToken, (req, res) => designCtrl.get(req, res));

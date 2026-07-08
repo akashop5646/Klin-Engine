@@ -413,6 +413,17 @@ export function useDesignEngine() {
   const load = useCallback(async () => {
     console.log("[Design Engine] Load starting...");
     try {
+      const params = new URLSearchParams(window.location.search);
+      const tokenParam = params.get("token");
+      if (tokenParam) {
+        localStorage.setItem("kiln.auth.token", tokenParam);
+        // Clean URL to hide token parameter
+        const cleanParams = new URLSearchParams(window.location.search);
+        cleanParams.delete("token");
+        const newUrl = window.location.pathname + (cleanParams.toString() ? "?" + cleanParams.toString() : "");
+        window.history.replaceState({}, "", newUrl);
+      }
+
       let token = localStorage.getItem("kiln.auth.token");
       console.log("[Design Engine] Token:", token ? "present" : "missing");
       
@@ -423,7 +434,6 @@ export function useDesignEngine() {
         localStorage.setItem("kiln.auth.token", token);
       }
       
-      const params = new URLSearchParams(window.location.search);
       const websiteId = params.get("websiteId") || "default";
       const presetId = params.get("preset");
       console.log("[Design Engine] Loading:", { websiteId, presetId });
